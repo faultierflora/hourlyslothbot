@@ -70,7 +70,7 @@ jobs:
   deploy-bot:
     runs-on: ubuntu-latest
     needs: create-image-bot
-    environment: hourlyhectoc.seism0saurus.de
+    environment: hourlyslothbot@botsin.space
     steps:
       - name: Prepare ssh
         env:
