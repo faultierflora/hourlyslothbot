@@ -14,7 +14,6 @@ import social.bigbone.api.exception.BigBoneRequestException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
