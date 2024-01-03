@@ -4,14 +4,21 @@ import faultierflora.hourlyslothbot.mastodon.StatusRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
 import social.bigbone.api.entity.Status;
 import social.bigbone.api.exception.BigBoneRequestException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.Stream;
 
 /**
  * The SlothScheduler is responsible for scheduling toots with a new sloth picture.
@@ -36,6 +43,13 @@ public class SlothScheduler {
     private final StatusRepository repo;
 
     /**
+     * The directory of the sloth images and descriptions.
+     * Can be configured in the <code>application.properties</code>.
+     */
+    @Value("${sloths.dir}")
+    private String slothDirectory;
+
+    /**
      * The sole constructor for this class.
      * The needed classes are {@link org.springframework.beans.factory.annotation.Autowired autowired} by Spring.
      *
@@ -52,29 +66,41 @@ public class SlothScheduler {
      * <p>
      * Exceptions are logged as errors and suppressed. No further error handling is applied.
      */
-    @Scheduled(cron = "0 * * * * ?")
-    public void postSloth() {
+    @Scheduled(cron = "0 0 * * * ?")
+    public void postSloth() throws FileNotFoundException {
         LOGGER.info("Going to post new sloth");
-
-        String yamlFilename = "sloths/00001.yaml";
-        String imageFilename = "sloths/00001.jpg";
-
-        Map<String, Object> yaml = loadYaml(yamlFilename);
-
-        LOGGER.info("Posting " + imageFilename);
+        String paddedSlothNumber = getPaddedSlothNumber();
+        Map<String, Object> yaml = loadYaml(paddedSlothNumber);
+        File image = loadImage(paddedSlothNumber);
+        LOGGER.info("Posting sloth number " + paddedSlothNumber);
         try {
-            Status status = this.repo.postStatus(yaml, imageFilename);
+            Status status = this.repo.postStatus(yaml, image);
             LOGGER.info("Sloth successfully postet with id " + status.getId());
         } catch (BigBoneRequestException e) {
             LOGGER.error("An error occurred. Status code: " + e.getHttpStatusCode() + "; message: " + e.getMessage() + "; cause:" + e.getCause());
         }
     }
 
-    private Map<String, Object> loadYaml(String filename) {
+    private String getPaddedSlothNumber() {
+        File slothDirectoryAsFile = new File(slothDirectory);
+        List<File> slothList = Stream.of(slothDirectoryAsFile.listFiles())
+                .filter(file -> file.getName().endsWith(".jpg"))
+                .toList();
+        Random rand = new Random();
+        int imageNumber = rand.nextInt(slothList.size()) + 1;
+        String fileNumber = String.format("%05d", imageNumber);
+        return fileNumber;
+    }
+
+    private Map<String, Object> loadYaml(final String paddedSlothNumber) throws FileNotFoundException {
+        String filename = slothDirectory + "/" + paddedSlothNumber + ".yaml";
         Yaml yaml = new Yaml();
-        InputStream inputStream = this.getClass()
-                .getClassLoader()
-                .getResourceAsStream(filename);
-        return yaml.load(inputStream);
+        File file = new File(filename);
+        return yaml.load(new FileInputStream(file));
+    }
+
+    private File loadImage(final String paddedSlothNumber) {
+        String filename = slothDirectory + "/" + paddedSlothNumber + ".jpg";
+        return new File(filename);
     }
 }

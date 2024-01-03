@@ -90,10 +90,7 @@ public class StatusRepositoryImpl implements StatusRepository {
         LOGGER.info("StatusInterfaceImpl for mastodon instance " + instance + " created");
     }
 
-    public Status postStatus(Map<String, Object> yaml, final String filename) throws BigBoneRequestException {
-        // Read file from resources folder
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final File uploadFile = new File(classLoader.getResource(filename).getFile());
+    public Status postStatus(Map<String, Object> yaml, final File uploadFile) throws BigBoneRequestException {
 
         // Get the description
         String description = (String) yaml.get("description");
