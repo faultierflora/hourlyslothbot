@@ -107,7 +107,7 @@ public class StatusRepositoryImpl implements StatusRepository {
         String statusText = createText(yaml);
 
         // Post the new status
-        return client.statuses().postStatus(statusText, mediaIds, Visibility.DIRECT, null, false, null, "en").execute();
+        return client.statuses().postStatus(statusText, mediaIds, Visibility.PUBLIC, null, false, null, "en").execute();
     }
 
 

@@ -75,7 +75,6 @@ public class SlothScheduler {
         InputStream inputStream = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream(filename);
-        Map<String, Object> statusText = yaml.load(inputStream);
-        return statusText;
+        return yaml.load(inputStream);
     }
 }
