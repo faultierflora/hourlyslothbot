@@ -16,7 +16,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Get cache for local Maven repository
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ~/.m2/repository
           key: maven-verify
