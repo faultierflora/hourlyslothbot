@@ -112,7 +112,7 @@ public class StatusRepositoryImpl implements StatusRepository {
     private String createText(final Map<String, Object> yaml) {
         Random rand = new Random();
         final String randomGreeting = greetings.get(rand.nextInt(greetings.size()));
-        final String randomAnnouncement = announcement.get(rand.nextInt(greetings.size()));
+        final String randomAnnouncement = announcement.get(rand.nextInt(announcement.size()));
         return randomGreeting
                 + "\n\n"
                 + randomAnnouncement
