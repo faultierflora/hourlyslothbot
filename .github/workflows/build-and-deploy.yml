@@ -7,6 +7,10 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
     types: [ "closed" ]
+  schedule:
+    # Nightly rebuild so the image picks up patched base images (JRE, OS packages)
+    - cron: "45 2 * * *"
+  workflow_dispatch:
 
 env:
   VERSION: 0.0.1-SNAPSHOT
@@ -60,10 +64,16 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/faultierflora/hourlyslothbot
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=main,enable={{is_default_branch}}
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: containerimage/.
+          pull: true
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
