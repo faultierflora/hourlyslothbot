@@ -72,22 +72,14 @@ public class StatusRepositoryImpl implements StatusRepository {
 
     /**
      * The sole constructor for this class.
-     * The needed classes are provided by Spring {@link org.springframework.beans.factory.annotation.Value Values}.
+     * The needed classes are provided by Spring.
      *
-     * @param instance    The mastodon instance for this repository. Can be configured in the <code>application.properties</code>.
-     * @param accessToken The access token for this repository.
-     *                    You get an access token on the instance of your bot at the {@link <a href="https://docs.joinmastodon.org/spec/oauth/#token">Token Endpoint</a>} of your bot's instance or in the GUI.
-     *                    Can be configured in the <code>application.properties</code>.
+     * @param client The {@link MastodonClient MastodonClient} for the configured mastodon instance.
+     *               It is created by the {@link MastodonConfiguration MastodonConfiguration}.
      */
-    public StatusRepositoryImpl(
-            @Value(value = "${mastodon.instance}") String instance,
-            @Value(value = "${mastodon.accessToken}") String accessToken) {
-        this.client = new MastodonClient.Builder(instance)
-                .accessToken(accessToken)
-                .setReadTimeoutSeconds(240)
-                .setReadTimeoutSeconds(240)
-                .build();
-        LOGGER.info("StatusInterfaceImpl for mastodon instance " + instance + " created");
+    public StatusRepositoryImpl(final MastodonClient client) {
+        this.client = client;
+        LOGGER.info("StatusRepositoryImpl for mastodon instance " + client.getInstanceName() + " created");
     }
 
     public Status postStatus(Map<String, Object> yaml, final File uploadFile) throws BigBoneRequestException {
