@@ -37,7 +37,7 @@ jobs:
       - name: Copy jar
         run: cp /home/runner/work/hourlyslothbot/hourlyslothbot/target/hourlyslothbot-*.jar bot.jar
       - name: Archive bot jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bot
           path: bot.jar
