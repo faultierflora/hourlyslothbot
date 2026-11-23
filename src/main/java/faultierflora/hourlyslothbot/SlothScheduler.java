@@ -4,7 +4,6 @@ import faultierflora.hourlyslothbot.mastodon.StatusRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
@@ -17,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Stream;
 
 /**
  * The SlothScheduler is responsible for scheduling toots with a new sloth picture.
@@ -43,19 +41,24 @@ public class SlothScheduler {
 
     /**
      * The directory of the sloth images and descriptions.
-     * Can be configured in the <code>application.properties</code>.
      */
-    @Value("${sloths.dir}")
-    private String slothDirectory;
+    private final SlothDirectory slothDirectory;
+
+    /**
+     * The random generator to choose the next sloth.
+     */
+    private final Random random = new Random();
 
     /**
      * The sole constructor for this class.
      * The needed classes are {@link org.springframework.beans.factory.annotation.Autowired autowired} by Spring.
      *
      * @param statusRepository The  {@link faultierflora.hourlyslothbot.mastodon.StatusRepository StatusRepository} for mastodon.
+     * @param slothDirectory   The directory of the sloth images and descriptions.
      */
-    public SlothScheduler(@Autowired StatusRepository statusRepository) {
+    public SlothScheduler(@Autowired StatusRepository statusRepository, @Autowired SlothDirectory slothDirectory) {
         this.repo = statusRepository;
+        this.slothDirectory = slothDirectory;
     }
 
     /**
@@ -68,10 +71,21 @@ public class SlothScheduler {
     @Scheduled(cron = "0 0 * * * ?")
     public void postSloth() throws FileNotFoundException {
         LOGGER.info("Going to post new sloth");
-        String paddedSlothNumber = getPaddedSlothNumber();
-        Map<String, Object> yaml = loadYaml(paddedSlothNumber);
-        File image = loadImage(paddedSlothNumber);
-        LOGGER.info("Posting sloth number " + paddedSlothNumber);
+        List<File> sloths;
+        try {
+            sloths = slothDirectory.findSlothImages();
+        } catch (IllegalStateException e) {
+            LOGGER.error("Can't post a sloth: " + e.getMessage());
+            return;
+        }
+        if (sloths.isEmpty()) {
+            LOGGER.error("Can't post a sloth: No sloths found in " + slothDirectory.getDirectory());
+            return;
+        }
+
+        File image = sloths.get(random.nextInt(sloths.size()));
+        Map<String, Object> yaml = loadYaml(slothDirectory.descriptionOf(image));
+        LOGGER.info("Posting sloth number " + slothDirectory.nameOf(image));
         try {
             Status status = this.repo.postStatus(yaml, image);
             LOGGER.info("Sloth successfully postet with id " + status.getId());
@@ -80,26 +94,8 @@ public class SlothScheduler {
         }
     }
 
-    private String getPaddedSlothNumber() {
-        File slothDirectoryAsFile = new File(slothDirectory);
-        List<File> slothList = Stream.of(slothDirectoryAsFile.listFiles())
-                .filter(file -> file.getName().endsWith(".jpg"))
-                .toList();
-        Random rand = new Random();
-        int imageNumber = rand.nextInt(slothList.size()) + 1;
-        String fileNumber = String.format("%05d", imageNumber);
-        return fileNumber;
-    }
-
-    private Map<String, Object> loadYaml(final String paddedSlothNumber) throws FileNotFoundException {
-        String filename = slothDirectory + "/" + paddedSlothNumber + ".yaml";
+    private Map<String, Object> loadYaml(final File file) throws FileNotFoundException {
         Yaml yaml = new Yaml();
-        File file = new File(filename);
         return yaml.load(new FileInputStream(file));
-    }
-
-    private File loadImage(final String paddedSlothNumber) {
-        String filename = slothDirectory + "/" + paddedSlothNumber + ".jpg";
-        return new File(filename);
     }
 }

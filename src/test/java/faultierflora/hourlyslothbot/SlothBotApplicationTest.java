@@ -1,9 +1,13 @@
 package faultierflora.hourlyslothbot;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import social.bigbone.MastodonClient;
+
+import static org.mockito.Mockito.mockStatic;
 
 /**
  * Smoke test for the {@link SlothBotApplication SlothBotApplication}.
@@ -26,5 +30,15 @@ class SlothBotApplicationTest {
     void contextLoads() {
         // This test will fail if the application context cannot start
         // or if Spring finds that components that should be present are missing.
+    }
+
+    @Test
+    void mainShouldRunSpringApplication() {
+        String[] args = {"--some.argument=value"};
+        try (MockedStatic<SpringApplication> springApplication = mockStatic(SpringApplication.class)) {
+            SlothBotApplication.main(args);
+
+            springApplication.verify(() -> SpringApplication.run(SlothBotApplication.class, args));
+        }
     }
 }

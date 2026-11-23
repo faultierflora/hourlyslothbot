@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/nodeinfo/2.0"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "version": "2.0",
+      "software": {"name": "mastodon", "version": "4.3.3"},
+      "protocols": ["activitypub"],
+      "services": {"outbound": [], "inbound": []},
+      "usage": {"users": {"total": 1, "activeMonth": 1, "activeHalfyear": 1}, "localPosts": 1},
+      "openRegistrations": false,
+      "metadata": {}
+    }
+  }
+}

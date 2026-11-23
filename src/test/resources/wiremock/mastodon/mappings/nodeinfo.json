@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/.well-known/nodeinfo"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "links": [
+        {
+          "rel": "http://nodeinfo.diaspora.software/ns/schema/2.0",
+          "href": "{{request.baseUrl}}/nodeinfo/2.0"
+        }
+      ]
+    },
+    "transformers": ["response-template"]
+  }
+}

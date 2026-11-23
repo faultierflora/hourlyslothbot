@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/media"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "4711",
+      "type": "image",
+      "url": "http://localhost/media/4711.jpg"
+    }
+  }
+}

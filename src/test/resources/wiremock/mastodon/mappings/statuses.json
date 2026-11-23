@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/statuses"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "1337",
+      "content": "A new sloth",
+      "visibility": "public",
+      "language": "en"
+    }
+  }
+}
